@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arcade</title>
+<style>
+:root{--bg:#0e151c;--panel:#16212b;--ink:#e9eff4;--muted:#8fa2b3;--line:#263645;--accent:#f2b84b;--accent-ink:#1a1305}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line);background:var(--panel)}
+header h1{font-size:1.25rem;margin:0;margin-right:auto}
+#q{width:min(280px,100%);padding:9px 12px;background:var(--bg);border:1px solid var(--line);border-radius:6px}
+.btn{padding:9px 14px;background:transparent;border:1px solid var(--line);border-radius:6px;cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+#chips{display:flex;flex-wrap:wrap;gap:8px;padding:14px 20px 0}
+.chip{padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;cursor:pointer;font-size:.9rem;color:var(--muted)}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding:20px}
+.card{display:flex;flex-direction:column;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;cursor:pointer;padding:0}
+.card:hover{border-color:var(--accent)}
+.thumb{aspect-ratio:16/10;display:grid;place-items:center;font-size:2.6rem;font-weight:700;background-size:cover;background-position:center}
+.meta{padding:10px 12px 12px}
+.meta b{display:block}
+.meta small{color:var(--muted);display:block}
+#note{padding:20px;color:var(--muted);max-width:60ch}
+#player{position:fixed;inset:0;display:none;flex-direction:column;background:#000}
+#player.on{display:flex}
+#bar{display:flex;gap:10px;align-items:center;padding:8px 12px;background:var(--panel);border-bottom:1px solid var(--line)}
+#bar span{margin-right:auto;font-weight:600}
+#frame{flex:1;border:0;width:100%;background:#fff}
+</style>
+</head>
+<body>
+<header>
+  <h1>Arcade</h1>
+  <input id="q" type="search" placeholder="Search games" aria-label="Search games">
+  <button id="cloak" class="btn primary" type="button">Open in about:blank</button>
+</header>
+<div id="chips" role="group" aria-label="Categories"></div>
+<div id="grid"></div>
+
+<div id="player" role="dialog" aria-label="Game player">
+  <div id="bar">
+    <button id="back" class="btn" type="button">Back</button>
+    <span id="ptitle"></span>
+    <button id="reload" class="btn" type="button">Restart</button>
+    <button id="full" class="btn" type="button">Fullscreen</button>
+  </div>
+  <iframe id="frame" allow="fullscreen; autoplay; gamepad; clipboard-write" title="Game"></iframe>
+</div>
+
+<script>
+(function () {
+  var injected = location.protocol === 'about:';
+  var $ = function (s) { return document.querySelector(s); };
+  var games = [], cat = 'All', cloakTitle = 'Document';
+
+  function abs(u) { try { return new URL(u, location.href).href; } catch (e) { return u; } }
+  function hue(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 360; return h; }
+
+  function chips() {
+    var cats = ['All'];
+    games.forEach(function (g) { var c = g.category || 'Other'; if (cats.indexOf(c) < 0) cats.push(c); });
+    var box = $('#chips'); box.textContent = '';
+    cats.forEach(function (c) {
+      var b = document.createElement('button');
+      b.className = 'chip'; b.type = 'button'; b.textContent = c;
+      b.setAttribute('aria-pressed', c === cat);
+      b.onclick = function () { cat = c; chips(); render(); };
+      box.appendChild(b);
+    });
+  }
+
+  function render() {
+    var grid = $('#grid'), term = $('#q').value.toLowerCase().trim();
+    grid.textContent = '';
+    var list = games.filter(function (g) {
+      return (cat === 'All' || (g.category || 'Other') === cat) &&
+             (!term || (g.title + ' ' + (g.description || '')).toLowerCase().indexOf(term) >= 0);
+    });
+    if (!list.length) { grid.innerHTML = '<p id="note">No games found.</p>'; return; }
+    list.forEach(function (g) {
+      var b = document.createElement('button');
+      b.className = 'card'; b.type = 'button';
+      var t = document.createElement('div'); t.className = 'thumb';
+      if (g.thumbnail) t.style.backgroundImage = 'url("' + g.thumbnail + '")';
+      else { t.style.background = 'hsl(' + hue(g.title) + ',40%,30%)'; t.textContent = g.title.charAt(0).toUpperCase(); }
+      var m = document.createElement('div'); m.className = 'meta';
+      var n = document.createElement('b'); n.textContent = g.title;
+      var d = document.createElement('small'); d.textContent = g.description || g.category || '';
+      m.appendChild(n); m.appendChild(d); b.appendChild(t); b.appendChild(m);
+      b.onclick = function () { play(g); };
+      grid.appendChild(b);
+    });
+  }
+
+  function play(g) {
+    $('#ptitle').textContent = g.title;
+    $('#frame').src = g.url;
+    $('#player').classList.add('on');
+  }
+  function stop() { $('#player').classList.remove('on'); $('#frame').src = 'about:blank'; }
+
+  function boot(list) { games = list; stop(); chips(); render(); }
+
+  $('#q').oninput = render;
+  $('#back').onclick = stop;
+  $('#reload').onclick = function () { var f = $('#frame'); f.src = f.src; };
+  $('#full').onclick = function () { var f = $('#frame'); (f.requestFullscreen || f.webkitRequestFullscreen || function () {}).call(f); };
+  addEventListener('keydown', function (e) { if (e.key === 'Escape' && $('#player').classList.contains('on') && !document.fullscreenElement) stop(); });
+
+  $('#cloak').onclick = function () {
+    var w = window.open('about:blank', '_blank');
+    if (!w) { alert('Popup blocked. Allow popups for this page and try again.'); return; }
+    w.name = JSON.stringify({ games: games, title: cloakTitle });
+    w.document.open();
+    w.document.write('<!DOCTYPE html>\n' + document.documentElement.outerHTML);
+    w.document.close();
+  };
+
+  if (injected) {
+    // Running inside the about:blank copy: games arrive pre-resolved via window.name
+    var d = {}; try { d = JSON.parse(window.name || '{}'); } catch (e) {}
+    window.name = '';
+    document.title = d.title || 'Document';
+    $('#cloak').remove();
+    boot(d.games || []);
+  } else {
+    fetch('games.json')
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function (j) {
+        cloakTitle = j.cloakTitle || 'Document';
+        boot((j.games || []).map(function (g) {
+          return { title: g.title || 'Untitled', category: g.category, description: g.description,
+                   url: abs(g.url), thumbnail: g.thumbnail ? abs(g.thumbnail) : '' };
+        }));
+      })
+      .catch(function () {
+        $('#grid').innerHTML = '<p id="note">Couldn\u2019t load games.json. Browsers block this when the page is opened straight from disk. Host the folder (GitHub Pages, Netlify, any web server) or run <code>python3 -m http.server</code> in it and open the localhost address.</p>';
+      });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Browser</title>
+<style>
+:root{--bg:#0e151c;--panel:#16212b;--tab:#1d2b37;--ink:#e9eff4;--muted:#8fa2b3;--line:#263645;--accent:#f2b84b;--accent-ink:#1a1305}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+#tabs{display:flex;gap:2px;align-items:flex-end;padding:6px 8px 0;background:var(--bg);overflow-x:auto}
+.tab{display:flex;align-items:center;gap:6px;min-width:90px;max-width:200px;padding:7px 10px;background:var(--tab);border:1px solid var(--line);border-bottom:0;border-radius:8px 8px 0 0;cursor:pointer;color:var(--muted)}
+.tab.on{background:var(--panel);color:var(--ink)}
+.tab .t{flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.tab .x{border:0;background:transparent;cursor:pointer;color:inherit;padding:0 2px;border-radius:4px}
+.tab .x:hover{background:var(--line)}
+#newtab{border:0;background:transparent;color:var(--muted);font-size:20px;cursor:pointer;padding:2px 10px}
+#nav{display:flex;gap:6px;align-items:center;padding:6px 8px;background:var(--panel);border-bottom:1px solid var(--line)}
+.ib{border:0;background:transparent;cursor:pointer;padding:6px 10px;border-radius:6px;font-size:15px}
+.ib:hover{background:var(--line)}
+#addr{flex:1;padding:7px 12px;background:var(--bg);border:1px solid var(--line);border-radius:999px}
+#cloak{padding:6px 12px;border:0;border-radius:6px;background:var(--accent);color:var(--accent-ink);font-weight:600;cursor:pointer}
+#panic{padding:6px 12px;border:1px solid #8a2d2d;border-radius:6px;background:transparent;color:#ff8a80;font-weight:600;cursor:pointer}
+#panic:hover{background:#3a1c1c}
+#views{flex:1;position:relative}
+#views iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;display:none}
+#views iframe.on{display:block}
+</style>
+</head>
+<body>
+<div id="tabs"></div>
+<div id="nav">
+  <button class="ib" id="back" title="Back" aria-label="Back">&#8592;</button>
+  <button class="ib" id="fwd" title="Forward" aria-label="Forward">&#8594;</button>
+  <button class="ib" id="reload" title="Reload" aria-label="Reload">&#8635;</button>
+  <input id="addr" type="text" placeholder="Search or enter address" aria-label="Address" autocomplete="off" spellcheck="false">
+  <button class="ib" id="settings" title="Settings" aria-label="Settings">&#9881;</button>
+  <button id="panic" type="button" title="Panic: leave immediately">Panic</button>
+  <button id="cloak" type="button">about:blank</button>
+</div>
+<div id="views"></div>
+
+<script>
+/* ---------- PROXY CONFIG ----------
+   A static page can't proxy traffic by itself. Websites load through whatever
+   encode() returns. With enabled:false, URLs load directly (sites that forbid
+   framing will appear blank). To use a real proxy, host an open-source proxy
+   backend alongside this folder, then set enabled:true and fill these in.
+   Example (Ultraviolet, after adding its scripts/service worker):
+     register: function(){ return navigator.serviceWorker.register('/uv/sw.js', {scope: __uv$config.prefix}); },
+     encode:   function(u){ return __uv$config.prefix + __uv$config.encodeUrl(u); }
+*/
+var PROXY = {
+  enabled: false,
+  register: function () { return Promise.resolve(); },
+  encode: function (url) { return url; },
+  search: 'https://duckduckgo.com/?q='
+};
+var GAMES_PAGE = 'index.html';   // the game library, pinned as the first tab
+var SCHEME = 'accelerate://';
+var WEB = 'web:';   // external sites display as web:https://...
+// accelerate://<name> loads a local page. Aliases go here; anything else maps to <name>.html
+var ROUTES = { games: 'index.html' };
+var DEFAULTS = { preset: 'none', title: '', icon: '', panicUrl: 'https://classroom.google.com', panicKey: '`', showPanic: true };
+var S = Object.assign({}, DEFAULTS);
+/* ----------------------------------- */
+
+var injected = location.protocol === 'about:';
+var $ = function (s) { return document.querySelector(s); };
+var BASE = location.href, tabs = [], active = null, n = 0;
+
+function abs(u) { try { return new URL(u, BASE).href; } catch (e) { return u; } }
+
+// Real file URL (in this folder) -> accelerate:// address. Anything else is returned unchanged.
+function toDisplay(u) {
+  try {
+    var url = new URL(u), b = new URL(BASE);
+    if (url.origin !== b.origin) return u;
+    var dir = b.pathname.replace(/[^\/]*$/, '');
+    if (url.pathname.indexOf(dir) !== 0) return u;
+    var p = url.pathname.slice(dir.length).replace(/\.html?$/i, '').replace(/\/$/, '');
+    if (!p || p === 'index') p = 'games';
+    return SCHEME + p;
+  } catch (e) { return u; }
+}
+
+function resolve(input) {
+  input = input.trim();
+  var url;
+  if (/^[a-z][a-z0-9+.-]*:\/\//i.test(input)) url = input;
+  else if (/^[^\s]+\.[a-z]{2,}(\/|$|\?|:)/i.test(input)) url = 'https://' + input;
+  else url = PROXY.search + encodeURIComponent(input);
+  return url;
+}
+function load(url) { return PROXY.enabled ? abs(PROXY.encode(url)) : url; }
+
+function addTab(opts) {
+  var t = { id: ++n, title: opts.title || 'New Tab', url: opts.url || '', pinned: !!opts.pinned, internal: !!opts.internal };
+  t.frame = document.createElement('iframe');
+  t.frame.setAttribute('allow', 'fullscreen; autoplay; gamepad; clipboard-write');
+  t.frame.title = t.title;
+  if (opts.src) t.frame.src = opts.src;
+  t.frame.addEventListener('load', function () { hook(t); updateTitle(t); });
+  $('#views').appendChild(t.frame);
+  tabs.push(t);
+  select(t);
+  return t;
+}
+
+function updateTitle(t) {
+  try {
+    var w = t.frame.contentWindow, d = t.frame.contentDocument;
+    if (t.internal) {
+      var disp = toDisplay(w.location.href);
+      if (disp.indexOf(SCHEME) === 0) { t.url = disp; if (t === active) $('#addr').value = t.url; }
+    }
+    if (d && d.title && !t.pinned) t.title = d.title;
+  } catch (e) { /* cross-origin: keep what we have */ }
+  renderTabs();
+}
+
+function navigate(t, input) {
+  input = input.trim();
+  if (input.toLowerCase().indexOf(SCHEME) === 0) {
+    var path = input.slice(SCHEME.length).replace(/^\/+|\/+$/g, '').toLowerCase() || 'games';
+    var file = ROUTES[path] || (/\.[a-z0-9]+$/.test(path) ? path : path + '.html');
+    t.internal = true;
+    t.url = SCHEME + path;
+    t.title = path.split('/').pop().replace(/^./, function (c) { return c.toUpperCase(); });
+    t.frame.src = abs(file);
+  } else {
+    if (input.toLowerCase().indexOf(WEB) === 0) input = input.slice(WEB.length);
+    var url = resolve(input);
+    t.internal = false;
+    t.url = WEB + url;
+    try { t.title = new URL(url).hostname; } catch (e) { t.title = url; }
+    t.frame.src = load(url);
+  }
+  renderTabs();
+  if (t === active) $('#addr').value = t.url;
+}
+
+function select(t) {
+  active = t;
+  tabs.forEach(function (x) { x.frame.classList.toggle('on', x === t); });
+  $('#addr').value = t.url;
+  renderTabs();
+  if (!t.pinned && !t.url) $('#addr').focus();
+}
+
+function closeTab(t) {
+  if (t.pinned) return;
+  var i = tabs.indexOf(t);
+  tabs.splice(i, 1);
+  t.frame.remove();
+  if (active === t) select(tabs[Math.max(0, i - 1)]); else renderTabs();
+}
+
+function renderTabs() {
+  var bar = $('#tabs'); bar.textContent = '';
+  tabs.forEach(function (t) {
+    var el = document.createElement('div');
+    el.className = 'tab' + (t === active ? ' on' : '');
+    el.setAttribute('role', 'button'); el.tabIndex = 0;
+    var s = document.createElement('span'); s.className = 't'; s.textContent = t.title;
+    el.appendChild(s);
+    if (!t.pinned) {
+      var x = document.createElement('button'); x.className = 'x'; x.textContent = '\u00d7';
+      x.setAttribute('aria-label', 'Close tab');
+      x.onclick = function (e) { e.stopPropagation(); closeTab(t); };
+      el.appendChild(x);
+    }
+    el.onclick = function () { select(t); };
+    el.onkeydown = function (e) { if (e.key === 'Enter') select(t); };
+    bar.appendChild(el);
+  });
+  var plus = document.createElement('button');
+  plus.id = 'newtab'; plus.textContent = '+'; plus.setAttribute('aria-label', 'New tab');
+  plus.onclick = function () { addTab({}); };
+  bar.appendChild(plus);
+}
+
+$('#addr').addEventListener('keydown', function (e) {
+  if (e.key !== 'Enter' || !this.value.trim()) return;
+  var v = this.value, t = active;
+  if (t.pinned) t = addTab({});     // the Games tab stays put; open a new tab instead
+  navigate(t, v);
+});
+function tryHist(d) { try { active.frame.contentWindow.history.go(d); } catch (e) {} }
+$('#back').onclick = function () { tryHist(-1); };
+$('#fwd').onclick = function () { tryHist(1); };
+$('#reload').onclick = function () {
+  var f = active.frame;
+  try { f.contentWindow.location.reload(); } catch (e) { f.src = f.src; }
+};
+
+function doCloak() {
+  var w = window.open('about:blank', '_blank');
+  if (!w) { alert('Popup blocked. Allow popups for this page and try again.'); return; }
+  w.name = JSON.stringify({ base: BASE });
+  w.document.open();
+  w.document.write('<!DOCTYPE html>\n' + document.documentElement.outerHTML);
+  w.document.close();
+}
+$('#cloak').onclick = doCloak;
+
+// ---------- settings, tab cloak, panic ----------
+function loadS() {
+  try { var r = localStorage.getItem('accelerate.settings'); if (r) Object.assign(S, JSON.parse(r)); } catch (e) {}
+}
+function saveS() { try { localStorage.setItem('accelerate.settings', JSON.stringify(S)); } catch (e) {} }
+
+function applyS() {
+  document.title = S.title || (injected ? 'Document' : 'Browser');
+  Array.prototype.forEach.call(document.querySelectorAll('link[rel~="icon"]'), function (l) { l.remove(); });
+  if (S.icon) {
+    var l = document.createElement('link'); l.rel = 'icon'; l.href = S.icon;
+    document.head.appendChild(l);
+  }
+  $('#panic').style.display = S.showPanic ? '' : 'none';
+}
+
+function panic() {
+  var u = (S.panicUrl || DEFAULTS.panicUrl).trim();
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(u)) u = 'https://' + u;
+  location.replace(u);
+}
+
+function isTyping(el) { return !!(el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)); }
+function onKey(e) {
+  if (!S.panicKey || e.ctrlKey || e.metaKey || e.altKey || isTyping(e.target)) return;
+  if (e.key === S.panicKey) { e.preventDefault(); panic(); }
+}
+function hook(t) { try { t.frame.contentWindow.addEventListener('keydown', onKey, true); } catch (e) {} }
+addEventListener('keydown', onKey, true);
+
+function openSettings() {
+  var t = tabs.filter(function (x) { return x.url === SCHEME + 'settings'; })[0];
+  if (t) { select(t); return; }
+  t = addTab({}); navigate(t, SCHEME + 'settings');
+}
+
+addEventListener('message', function (e) {
+  var m = e.data;
+  if (!m || typeof m.type !== 'string') return;
+  if (m.type === 'accelerate:nav') {
+    if (typeof m.url !== 'string' || m.url.indexOf(SCHEME) !== 0) return;
+    tabs.forEach(function (t) {
+      if (t.frame.contentWindow === e.source) {
+        t.url = m.url;
+        if (t === active) $('#addr').value = t.url;
+      }
+    });
+    return;
+  }
+  // everything below changes settings or triggers actions: only accept it from our own pages
+  var trusted = false;
+  try { trusted = e.origin === new URL(BASE).origin; } catch (x) {}
+  if (!trusted) return;
+  if (m.type === 'accelerate:getsettings') {
+    e.source.postMessage({ type: 'accelerate:settings', settings: S, env: { injected: injected } }, '*');
+  } else if (m.type === 'accelerate:setsettings' && m.settings) {
+    Object.keys(DEFAULTS).forEach(function (k) {
+      if (typeof m.settings[k] === typeof DEFAULTS[k]) S[k] = m.settings[k];
+    });
+    saveS(); applyS();
+  } else if (m.type === 'accelerate:cloak') {
+    if (!injected) doCloak();
+  } else if (m.type === 'accelerate:key') {
+    if (!m.ctrl && !m.typing && S.panicKey && m.key === S.panicKey) panic();
+  }
+});
+
+$('#settings').onclick = openSettings;
+$('#panic').onclick = panic;
+
+function start() {
+  PROXY.register().catch(function () {}).then(function () {
+    addTab({ title: 'Games', pinned: true, internal: true, url: SCHEME + 'games', src: abs(GAMES_PAGE) });
+  });
+}
+
+if (injected) {
+  var d = {}; try { d = JSON.parse(window.name || '{}'); } catch (e) {}
+  window.name = '';
+  BASE = d.base || BASE;
+  $('#cloak').remove();   // copy is already cloaked
+  $('#views').textContent = '';   // drop frames serialized from the original page
+}
+loadS();
+applyS();
+start();
+</script>
+</body>
+</html>

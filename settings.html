@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings</title>
+<style>
+:root{--bg:#0e151c;--panel:#16212b;--ink:#e9eff4;--muted:#8fa2b3;--line:#263645;--accent:#f2b84b;--accent-ink:#1a1305}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:640px;margin:0 auto;padding:24px 20px 60px}
+h1{font-size:1.3rem;margin:0 0 18px}
+section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:16px}
+h2{font-size:1rem;margin:0 0 4px}
+.hint{color:var(--muted);font-size:.88rem;margin:0 0 6px}
+label{display:block;font-size:.88rem;margin:14px 0 4px}
+input[type=text],select{width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--line);border-radius:6px;color:var(--ink);font:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.check{display:flex;gap:8px;align-items:center;margin-top:14px}
+.check label{margin:0}
+.btn{margin-top:14px;padding:9px 16px;font:inherit;font-weight:600;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+#preview{display:flex;gap:8px;align-items:center;margin-top:14px;padding:8px 10px;background:var(--bg);border-radius:6px;color:var(--muted);font-size:.9rem}
+#preview img{width:16px;height:16px}
+#keyInput{width:120px;text-align:center;cursor:pointer}
+#note{display:none;color:var(--accent);margin-bottom:16px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Settings</h1>
+  <p id="note">Open this page from inside the browser for settings to take effect.</p>
+
+  <section>
+    <h2>Tab cloak</h2>
+    <p class="hint">Changes the title and icon of this browser tab.</p>
+    <label for="preset">Preset</label>
+    <select id="preset"></select>
+    <label for="title">Tab title</label>
+    <input id="title" type="text" placeholder="Leave empty for default">
+    <label for="icon">Favicon URL</label>
+    <input id="icon" type="text" placeholder="https://example.com/favicon.ico">
+    <div id="preview"><img id="pimg" alt="" hidden><span id="ptxt"></span></div>
+  </section>
+
+  <section>
+    <h2>Panic button</h2>
+    <p class="hint">Instantly replaces this tab with another site. It leaves no history entry.</p>
+    <label for="panicUrl">Redirect to</label>
+    <input id="panicUrl" type="text" placeholder="https://classroom.google.com">
+    <label for="keyInput">Hotkey (click, then press a key; Backspace clears)</label>
+    <input id="keyInput" type="text" readonly>
+    <div class="check"><input id="showPanic" type="checkbox"><label for="showPanic">Show panic button in the toolbar</label></div>
+    <p class="hint" style="margin-top:12px">The hotkey doesn't fire while you're typing in a text box. It also can't see key presses inside some external sites, so use the toolbar button there.</p>
+  </section>
+
+  <section id="cloakSec">
+    <h2>about:blank cloak</h2>
+    <p class="hint">Opens a new about:blank tab containing this browser, so the address bar shows only about:blank. Allow popups first.</p>
+    <button id="cloak" class="btn primary" type="button">Open in about:blank</button>
+  </section>
+
+  <section>
+    <h2>Reset</h2>
+    <button id="reset" class="btn" type="button">Restore defaults</button>
+  </section>
+</main>
+
+<script>
+(function () {
+  var $ = function (s) { return document.querySelector(s); };
+  var fav = function (d) { return 'https://www.google.com/s2/favicons?domain=' + d + '&sz=64'; };
+  var PRESETS = {
+    none:      { label: 'None (default)',  title: '', icon: '' },
+    classroom: { label: 'Google Classroom', title: 'Classroom', icon: fav('classroom.google.com') },
+    docs:      { label: 'Google Docs',      title: 'Untitled document - Google Docs', icon: fav('docs.google.com') },
+    drive:     { label: 'Google Drive',     title: 'My Drive - Google Drive', icon: fav('drive.google.com') },
+    canvas:    { label: 'Canvas',           title: 'Dashboard', icon: fav('instructure.com') },
+    custom:    { label: 'Custom',           title: '', icon: '' }
+  };
+  var DEFAULTS = { preset: 'none', title: '', icon: '', panicUrl: 'https://classroom.google.com', panicKey: '`', showPanic: true };
+  var S = Object.assign({}, DEFAULTS);
+
+  Object.keys(PRESETS).forEach(function (k) {
+    var o = document.createElement('option'); o.value = k; o.textContent = PRESETS[k].label;
+    $('#preset').appendChild(o);
+  });
+
+  function post(m) { try { parent.postMessage(m, '*'); } catch (e) {} }
+  function preview() {
+    $('#ptxt').textContent = S.title || '(default title)';
+    var img = $('#pimg');
+    if (S.icon) { img.src = S.icon; img.hidden = false; } else img.hidden = true;
+  }
+  function fill() {
+    $('#preset').value = PRESETS[S.preset] ? S.preset : 'custom';
+    $('#title').value = S.title; $('#icon').value = S.icon;
+    $('#panicUrl').value = S.panicUrl; $('#keyInput').value = S.panicKey;
+    $('#showPanic').checked = S.showPanic;
+    preview();
+  }
+  function save() { preview(); post({ type: 'accelerate:setsettings', settings: S }); }
+
+  $('#preset').onchange = function () {
+    S.preset = this.value;
+    if (S.preset !== 'custom') { S.title = PRESETS[S.preset].title; S.icon = PRESETS[S.preset].icon; }
+    fill(); save();
+  };
+  function custom() { S.preset = 'custom'; $('#preset').value = 'custom'; save(); }
+  $('#title').oninput = function () { S.title = this.value; custom(); };
+  $('#icon').oninput = function () { S.icon = this.value.trim(); custom(); };
+  $('#panicUrl').oninput = function () { S.panicUrl = this.value.trim(); save(); };
+  $('#showPanic').onchange = function () { S.showPanic = this.checked; save(); };
+  $('#keyInput').onkeydown = function (e) {
+    if (['Shift', 'Control', 'Alt', 'Meta', 'Tab'].indexOf(e.key) >= 0) return;
+    e.preventDefault();
+    S.panicKey = (e.key === 'Backspace' || e.key === 'Delete') ? '' : e.key;
+    this.value = S.panicKey; save();
+  };
+  $('#cloak').onclick = function () { post({ type: 'accelerate:cloak' }); };
+  $('#reset').onclick = function () { S = Object.assign({}, DEFAULTS); fill(); save(); };
+
+  addEventListener('message', function (e) {
+    if (e.source !== parent) return;
+    var m = e.data;
+    if (m && m.type === 'accelerate:settings' && m.settings) {
+      S = Object.assign({}, DEFAULTS, m.settings);
+      if (m.env && m.env.injected) $('#cloakSec').style.display = 'none';
+      fill();
+    }
+  });
+
+  if (window.parent === window) $('#note').style.display = 'block';
+  fill();
+  post({ type: 'accelerate:getsettings' });
+})();
+</script>
+</body>
+</html>

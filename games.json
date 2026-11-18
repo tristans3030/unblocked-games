@@ -1,0 +1,54 @@
+{
+  "cloakTitle": "Document",
+  "games": [
+    {
+      "title": "Slope",
+      "url": "games/slope/index.html",
+      "thumbnail": "games/slope/slope4.jpeg",
+      "category": "Arcade",
+      "description": "Roll as a ball on a steep slope. Don't hit the red!"
+    },
+    {
+      "title": "Gunspin",
+      "url": "games/gunspin.html",
+      "thumbnail": "",
+      "category": "Arcade",
+      "description": "A game where you shoot a gun to launch it and reach far distances."
+    },
+    {
+      "title": "2048",
+      "url": "games/2048-master/index.html",
+      "thumbnail": "",
+      "category": "Arcade",
+      "description": "2048"
+    },
+    {
+      "title": "The World's Hardest Game",
+      "url": "games/worlds-hardest-game/worlds-hardest-game.html",
+      "thumbnail": "",
+      "category": "Arcade",
+      "description": "The World's Hardest game. Avoid the red dots."
+    },
+    {
+      "title": "Among Us",
+      "url": "games/among-us/index.html",
+      "thumbnail": "games/among-us/red.png",
+      "category": "Arcade",
+      "description": "A social deduction game where you find impostors, or kill crewmates as one!"
+    },
+     {
+      "title": "Minecraft Classic",
+      "url": "games/minecraft-classic/index.html",
+      "thumbnail": "games/minecraft-classic/pack.png",
+      "category": "Arcade",
+      "description": "A game made up of blocks where you can build, destory, mine, and craft."
+    },
+    {
+      "title": "Proxy List",
+      "url": "games/proxy-list.html",
+      "thumbnail": "",
+      "category": "Arcade",
+      "description": "An embed of yourworstnightmare1's proxy list found on github."
+    }
+  ]
+}

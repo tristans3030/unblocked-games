@@ -1,0 +1,78 @@
+<html lang="en-us"><head><script src="https://account.y8.com/api/user_data/autologin?callback=idnet_autologin&amp;app_id=55961e5ee694aa0ae90003e8"></script><script>
+    if (window.parent !== window.self) window.parent.postMessage("bonk", "*");
+    window.addEventListener("DOMContentLoaded", function () {
+        document.body.style.margin = "0";
+        document.body.style.height = "100vh";
+        document.body.style.overflow = "hidden";
+    });
+</script>
+
+    
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <title>Slope | 3kh0</title>
+        <link href="shared/style.css" rel="stylesheet">
+        <link rel="stylesheet" href="TemplateData56/style.css">
+        <script src="TemplateData56/UnityProgress.js"></script>
+        <link rel="shortcut icon" href="TemplateData/favicon.ico">
+        <link rel="icon" href="slope4.jpeg">
+        <script src="Build/UnityLoader.js"></script>
+        <script>
+            window.rWS = WebSocket;
+            WebSocket = function (url, options) {
+                var split = url.split("://");
+                var prefix = "";
+                if (!url.includes("arc.io")) {
+                    switch (split[0].toLowerCase()) {
+                        case "ws":
+                            prefix = "wss://onebigorange-tmm.tbt.mx/websocket/http://";
+                            break;
+                        case "wss":
+                            prefix = "wss://onebigorange-tmm.tbt.mx/websocket/https://";
+                            break;
+                        default:
+                            prefix = split[0];
+                    }
+                    return new (Function.prototype.bind.call(
+                        window.rWS,
+                        null,
+                        (split[1].match(/\//g) || []).length === 0 ? (split[1].includes("?") ? prefix + split[1].replace("?", "/?") : prefix + split[1] + "/") : prefix + split[1],
+                        options
+                    ))();
+                } else {
+                    return new window.rWS(url, options);
+                }
+            };
+            var origOpen = XMLHttpRequest.prototype.open;
+            XMLHttpRequest.prototype.open = function (...args) {
+                if (!args[1].includes("arc.io")) args[1] = /^http/.test(args[1]) ? "https://onebigstatic-tmm.tbt.mx/static/" + args[1] : args[1];
+                origOpen.apply(this, args);
+            };
+            var gameInstance = UnityLoader.instantiate("gameContainer", "Build/slope_27Sept.json", {
+                onProgress: UnityProgress,
+                Module: {
+                    onRuntimeInitialized: function () {
+                        UnityProgress(gameInstance, "complete");
+                    },
+                },
+            });
+        </script>
+        <script async="" src="https://www.googletagmanager.com/gtag/js?id=G-98DP5VKS42"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", "G-98DP5VKS42");
+        </script>
+        <script src="shared/lib.js" type="text/javascript"></script>
+        <script src="shared/gamebreak/gamebreak.js" type="text/javascript"></script>
+    <script async="" src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5756835229788588" crossorigin="anonymous"></script><script src="https://data.3kh0.net/script.js" defer="" data-website-id="47d72bde-ba44-4125-b161-00e0c2f5b7f0"></script><style>@media print{.gr_no_print, :host(.gr_no_print), [data-grammarly-part]{display:none !important}}.f1l1o3bf{font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif, Arial;font-style:normal;font-weight:400}.f1l1o3bf button, .f1l1o3bf input, .f1l1o3bf textarea{font-family:inherit}.f4ofdyf{border:0.5px solid var(--origin-color-border-base-subdued);border-radius:8px;cursor:pointer;height:24px;transition:width 150ms cubic-bezier(0.05, 0.6, 0, 1), height 150ms cubic-bezier(0.05, 0.6, 0, 1), border-radius 150ms cubic-bezier(0.05, 0.6, 0, 1);width:24px}.f137tu7e{flex-shrink:0;transform:scale(1);transition:transform 150ms cubic-bezier(0.05, 0.6, 0, 1)}[data-origin-mode="dark"] .f137tu7e{--origin-color-logo-grammarly-light:var(--origin-color-logo-grammarly-dark);--origin-color-logo-grammarly-primary:var(--origin-color-logo-grammarly-default)}.ftwgcg0{-moz-appearance:none;-webkit-appearance:none;align-items:flex-start;appearance:none;background:transparent;border:none;color:inherit;cursor:pointer;display:flex;font:inherit;height:32px;justify-content:flex-start;padding:0;width:32px}.ftwgcg0:hover .f4ofdyf{border-radius:12px;height:32px;width:32px}.ftwgcg0:hover .f137tu7e{transform:scale(1.25)}.f13cnbb7 .f4ofdyf{border-radius:12px;height:32px;width:32px}.f13cnbb7 .f137tu7e{transform:scale(1.25)}.f8ia88a{--origin-color-button-ghost-content-default:#714cb6;--origin-color-button-ghost-content-states:#533192;--origin-color-button-primary-fill-active:#3f256f;--origin-color-button-primary-fill-default:#714cb6;--origin-color-button-primary-fill-hover:#533192;--origin-font-weight-heading-xsmall:600}[data-origin-mode="dark"] .f8ia88a{--origin-color-button-ghost-content-default:#d4c7ff;--origin-color-button-ghost-content-states:#bea1f5;--origin-color-button-primary-content-default:#141413;--origin-color-button-primary-fill-active:#e8e0ff;--origin-color-button-primary-fill-default:#bea1f5;--origin-color-button-primary-fill-hover:#d4c7ff}.f347vxz{font-weight:600}.fzewnqx{aspect-ratio:290 / 140;background-color:#2B1B3C;background-image:url("chrome-extension://kbfnbcaeplbcioakkpcpgfkobkghlhen/src/images/2f99186125d5fa82/goWritingActions.png"), linear-gradient(135deg, #2B1B3C 0%, #0656B8 48%, #006BFF 100%);background-position:center, center;background-repeat:no-repeat;background-size:cover, cover;border-radius:var(--origin-radius-4);overflow:hidden;width:100%}</style></head>
+    <body data-new-gr-c-s-check-loaded="14.1348.0" data-gr-ext-installed="" style="margin: 0px; height: 100vh; overflow: hidden;">
+        <div class="webgl-content">
+            <div id="gameContainer" style="width: 100vw; height: 100vh; padding: 0px; margin: 0px; border: 0px; position: relative; background: rgb(35, 31, 32);"><canvas id="#canvas" style="cursor: default;" width="1718" height="1318"></canvas><div class="logo Dark" style="display: none;"></div><div class="progress Dark" style="display: none;"><div class="empty" style="width: 0%;"></div><div class="full" style="width: 100%;"></div></div><div class="text" style="display: none;">Running... <img src="TemplateData56/gears.gif" class="spinner"></div></div>
+        <div class="sound-overlay" id="sound-overlay" style="display: none;"><span class="sound-text">Click here to enable sound!</span></div></div>
+        <script type="application/javascript" src="/js/main.js"></script>
+    
+<script src="blob:https://1kh0.github.io/3f2046eb-5cb0-4eb1-94b2-bf13c1bae955"></script></body><grammarly-desktop-integration data-grammarly-shadow-root="true" style="visibility: visible !important;"></grammarly-desktop-integration></html>

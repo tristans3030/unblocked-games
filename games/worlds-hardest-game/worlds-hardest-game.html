@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The World's Hardest Game</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: #0e0e10;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Helvetica, Arial, sans-serif;
+    }
+    #game-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    ruffle-player {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-container"></div>
+
+  <!-- Loads the latest Ruffle player -->
+  <script src="/ruffle/ruffle.js"></script>
+
+  <script>
+    // ==========================================
+    // CHANGE THIS TO YOUR SWF FILENAME
+    const SWF_FILE = "theworldshardestgame.swf";
+    // ==========================================
+
+    window.RufflePlayer = window.RufflePlayer || {};
+    window.RufflePlayer.config = {
+      autoplay: "on",
+      unmuteOverlay: "visible", // Shows a clean click-to-unmute button if browser blocks audio
+      backgroundColor: "#0e0e10",
+      letterbox: "on",          // Keeps the game's original aspect ratio with clean black bars
+      quality: "high",
+      contextMenu: "on",
+      splashScreen: false
+    };
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const ruffle = window.RufflePlayer.newest();
+      const player = ruffle.createPlayer();
+      const container = document.getElementById("game-container");
+      
+      container.appendChild(player);
+      player.load(SWF_FILE);
+    });
+  </script>
+
+</body>
+</html>
