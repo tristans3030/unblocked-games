@@ -17,8 +17,8 @@
     },
     {
       "title": "2048",
-      "url": "games/2048-master/index.html",
-      "thumbnail": "",
+      "url": "games/2048/index.html",
+      "thumbnail": "games/2048/thumb.png",
       "category": "Puzzle",
       "description": "Multiply powers of two until you reach 2048!"
     },
@@ -107,11 +107,18 @@
       "description": "A rhythm game where you press arrow keys to the music."
     },
      {
-      "title": "Slope 2",
-      "url": "games/slope2/slope2/index.html",
-      "thumbnail": "games/slope2/slope2/thumbnail.png",
-      "category": "Rhythm",
-      "description": "Roll down as a ball down a steep slope. Control where it goes and don't hit the red!"
+      "title": "Stack",
+      "url": "games/stack/index.html",
+      "thumbnail": "",
+      "category": "Strategy",
+      "description": "Stack the blocks as precisely as possible. Don't miss!"
+    },
+      {
+      "title": "Flappy 2048",
+      "url": "games/flappy-2048/index.html",
+      "thumbnail": "games/flappy-2048/thumb.png",
+      "category": "Strategy",
+      "description": "Flap your way up to 2048!"
     }
   ]
 }
