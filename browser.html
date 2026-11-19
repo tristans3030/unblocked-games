@@ -25,6 +25,14 @@ button,input{font:inherit;color:inherit}
 #cloak{padding:6px 12px;border:0;border-radius:6px;background:var(--accent);color:var(--accent-ink);font-weight:600;cursor:pointer}
 #panic{padding:6px 12px;border:1px solid #8a2d2d;border-radius:6px;background:transparent;color:#ff8a80;font-weight:600;cursor:pointer}
 #panic:hover{background:#3a1c1c}
+#risk{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:20px;background:rgba(5,9,13,.82)}
+#risk .box{width:min(520px,100%);max-height:100%;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px 26px}
+#risk h2{margin:0 0 6px;font-size:1.15rem}
+#risk p{margin:0 0 12px;color:var(--muted)}
+#risk ul{margin:0 0 18px;padding-left:20px}
+#risk li{margin-bottom:8px}
+#risk button{display:block;width:100%;padding:12px;border:0;border-radius:6px;background:var(--accent);color:var(--accent-ink);font-weight:600;font-size:15px;cursor:pointer}
+#risk button.alt{margin-top:8px;background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:500;font-size:14px;padding:10px}
 #views{flex:1;position:relative}
 #views iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;display:none}
 #views iframe.on{display:block}
@@ -59,12 +67,12 @@ var PROXY = {
   encode: function (url) { return url; },
   search: 'https://duckduckgo.com/?q='
 };
-var GAMES_PAGE = 'index.html';   // the game library, pinned as the first tab
+var GAMES_PAGE = 'games.html';   // the game library, pinned as the first tab
 var SCHEME = 'accelerate://';
 var WEB = 'web:';   // external sites display as web:https://...
 // accelerate://<name> loads a local page. Aliases go here; anything else maps to <name>.html
-var ROUTES = { games: 'index.html' };
-var DEFAULTS = { preset: 'none', title: '', icon: '', panicUrl: 'https://classroom.google.com', panicKey: '`', showPanic: true };
+var ROUTES = { games: 'games.html' };
+var DEFAULTS = { preset: 'none', title: '', icon: '', panicUrl: 'https://classroom.google.com', panicKey: '`', showPanic: true, hideRisks: false };
 var S = Object.assign({}, DEFAULTS);
 /* ----------------------------------- */
 
@@ -290,9 +298,35 @@ if (injected) {
   $('#cloak').remove();   // copy is already cloaked
   $('#views').textContent = '';   // drop frames serialized from the original page
 }
+function showRisks() {
+  if (S.hideRisks) return;
+  var old = document.getElementById('risk'); if (old) old.remove();
+  var o = document.createElement('div');
+  o.id = 'risk'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-modal', 'true'); o.setAttribute('aria-labelledby', 'riskT');
+  o.innerHTML =
+    '<div class="box">' +
+    '<h2 id="riskT">Before you continue</h2>' +
+    '<p>Using this at school or work carries real risks:</p>' +
+    '<ul>' +
+    '<li><b>You can still be seen.</b> Network filters, device management software, and screen monitoring can log or view your activity. Tab cloaking and about:blank only change what the tab shows.</li>' +
+    '<li><b>It may break the rules.</b> Bypassing filters or playing games on school or work devices can violate acceptable-use policies.</li>' +
+    '<li><b>There can be consequences.</b> These include lost device access, discipline, or trouble with your employer.</li>' +
+    '<li><b>Proxies see your traffic.</b> Whoever runs a proxy can see what you do through it, so don\u2019t enter passwords or personal information.</li>' +
+    '</ul>' +
+    '<button type="button" id="riskOk">I understand the risks</button>' +
+    '<button type="button" id="riskHide" class="alt">I understand, don\u2019t show this again</button>' +
+    '</div>';
+  document.body.appendChild(o);
+  var ok = document.getElementById('riskOk');
+  ok.onclick = function () { o.remove(); };
+  document.getElementById('riskHide').onclick = function () { S.hideRisks = true; saveS(); o.remove(); };
+  ok.focus();
+}
+
 loadS();
 applyS();
 start();
+showRisks();
 </script>
 </body>
 </html>

@@ -5,7 +5,7 @@
       "title": "Slope",
       "url": "games/slope/index.html",
       "thumbnail": "games/slope/slope4.jpeg",
-      "category": "Arcade",
+      "category": "Platformer",
       "description": "Roll as a ball on a steep slope. Don't hit the red!"
     },
     {
@@ -19,21 +19,21 @@
       "title": "2048",
       "url": "games/2048-master/index.html",
       "thumbnail": "",
-      "category": "Arcade",
-      "description": "2048"
+      "category": "Puzzle",
+      "description": "Multiply powers of two until you reach 2048!"
     },
     {
       "title": "The World's Hardest Game",
       "url": "games/worlds-hardest-game/worlds-hardest-game.html",
       "thumbnail": "",
-      "category": "Arcade",
+      "category": "Platformer",
       "description": "The World's Hardest game. Avoid the red dots."
     },
     {
       "title": "Among Us",
       "url": "games/among-us/index.html",
       "thumbnail": "games/among-us/red.png",
-      "category": "Arcade",
+      "category": "Strategy",
       "description": "A social deduction game where you find impostors, or kill crewmates as one!"
     },
      {
@@ -47,8 +47,71 @@
       "title": "Proxy List",
       "url": "games/proxy-list.html",
       "thumbnail": "",
-      "category": "Arcade",
+      "category": "Misc",
       "description": "An embed of yourworstnightmare1's proxy list found on github."
+    },
+     {
+      "title": "Chrome Dino Game",
+      "url": "games/chromedino/index.html",
+      "thumbnail": "",
+      "category": "Platformer",
+      "description": "Chrome's dino game that appears when you run out of internet."
+    },
+     {
+      "title": "Tetris",
+      "url": "games/tetris/index.html",
+      "thumbnail": "games/tetris/thumbnail.png",
+      "category": "Strategy",
+      "description": "A game where you stack blocks to clear rows."
+    },
+    {
+      "title": "Bitlife",
+      "url": "games/bitlife/index.html",
+      "thumbnail": "games/bitlife/logo.png",
+      "category": "Arcade",
+      "description": "Control a randomly generated life!"
+    },
+     {
+      "title": "Flappy Bird",
+      "url": "games/flappybird/index.html",
+      "thumbnail": "games/flappybird/thumbnail.png",
+      "category": "Platformer",
+      "description": "Press spacebar to fly and avoid the pipes."
+    },
+     {
+      "title": "Crossy Road",
+      "url": "games/crossyroad/index.html",
+      "thumbnail": "games/crossyroad/thumbnail.png",
+      "category": "Platformer",
+      "description": "As a chicken, cross the road and avoid cars and trains."
+    },
+    {
+      "title": "1v1.lol",
+      "url": "games/1v1lol/index.html",
+      "thumbnail": "games/1v1lol/logo.png",
+      "category": "Shooter",
+      "description": "1v1.LOL is a free-to-play, multiplayer online third-person shooter and battle royale video game heavily inspired by Fortnite."
+    },
+    {
+      "title": "Chess",
+      "url": "games/chess/chess/index.html",
+      "thumbnail": "",
+      "category": "Strategy",
+      "description": "The popular two player strategy game."
+    },
+     {
+      "title": "Friday Night Funkin'",
+      "url": "games/fridaynightfunkin/fridaynightfunkin.html",
+      "thumbnail": "games/fridaynightfunkin/thumbnail.png",
+      "category": "Rhythm",
+      "description": "A rhythm game where you press arrow keys to the music."
+    },
+     {
+      "title": "Slope 2",
+      "url": "games/slope2/slope2/index.html",
+      "thumbnail": "games/slope2/slope2/thumbnail.png",
+      "category": "Rhythm",
+      "description": "Roll down as a ball down a steep slope. Control where it goes and don't hit the red!"
     }
   ]
 }

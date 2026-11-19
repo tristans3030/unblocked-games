@@ -54,6 +54,11 @@ input[type=text],select{width:100%;padding:9px 11px;background:var(--bg);border:
     <p class="hint" style="margin-top:12px">The hotkey doesn't fire while you're typing in a text box. It also can't see key presses inside some external sites, so use the toolbar button there.</p>
   </section>
 
+  <section>
+    <h2>Startup notice</h2>
+    <div class="check"><input id="showRisks" type="checkbox"><label for="showRisks">Show the risk notice when the browser opens</label></div>
+  </section>
+
   <section id="cloakSec">
     <h2>about:blank cloak</h2>
     <p class="hint">Opens a new about:blank tab containing this browser, so the address bar shows only about:blank. Allow popups first.</p>
@@ -78,7 +83,7 @@ input[type=text],select{width:100%;padding:9px 11px;background:var(--bg);border:
     canvas:    { label: 'Canvas',           title: 'Dashboard', icon: fav('instructure.com') },
     custom:    { label: 'Custom',           title: '', icon: '' }
   };
-  var DEFAULTS = { preset: 'none', title: '', icon: '', panicUrl: 'https://classroom.google.com', panicKey: '`', showPanic: true };
+  var DEFAULTS = { preset: 'none', title: '', icon: '', panicUrl: 'https://classroom.google.com', panicKey: '`', showPanic: true, hideRisks: false };
   var S = Object.assign({}, DEFAULTS);
 
   Object.keys(PRESETS).forEach(function (k) {
@@ -97,6 +102,7 @@ input[type=text],select{width:100%;padding:9px 11px;background:var(--bg);border:
     $('#title').value = S.title; $('#icon').value = S.icon;
     $('#panicUrl').value = S.panicUrl; $('#keyInput').value = S.panicKey;
     $('#showPanic').checked = S.showPanic;
+    $('#showRisks').checked = !S.hideRisks;
     preview();
   }
   function save() { preview(); post({ type: 'accelerate:setsettings', settings: S }); }
@@ -111,6 +117,7 @@ input[type=text],select{width:100%;padding:9px 11px;background:var(--bg);border:
   $('#icon').oninput = function () { S.icon = this.value.trim(); custom(); };
   $('#panicUrl').oninput = function () { S.panicUrl = this.value.trim(); save(); };
   $('#showPanic').onchange = function () { S.showPanic = this.checked; save(); };
+  $('#showRisks').onchange = function () { S.hideRisks = !this.checked; save(); };
   $('#keyInput').onkeydown = function (e) {
     if (['Shift', 'Control', 'Alt', 'Meta', 'Tab'].indexOf(e.key) >= 0) return;
     e.preventDefault();
