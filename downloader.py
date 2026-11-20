@@ -3,7 +3,7 @@ from pathlib import Path
 from urllib.parse import urljoin, urlparse
 import urllib.request
 
-INDEX_URL = "https://orteil.dashnet.org/cookieclicker/img/"  # Your exact index URL
+INDEX_URL = "https://muzzid.pics/storage/ag/arsenic/geometry-dash/"  # Your exact index URL
 OUT_DIR = Path("img")
 HEADERS = {
     "User-Agent": (

@@ -123,9 +123,16 @@
     {
       "title": "Cookie Clicker",
       "url": "games/cookieclicker/index.html",
-      "thumbnail": "games/flappy-2048/thumb.png",
+      "thumbnail": "games/cookieclicker/thumbnail.jpg",
+      "category": "Idle",
+      "description": "Click on the cookie"
+    },
+     {
+      "title": "Block Blast",
+      "url": "games/blocky_puzzle/index.html",
+      "thumbnail": "games/blocky_puzzle/thumbnail.jpg",
       "category": "Strategy",
-      "description": "Flap your way up to 2048!"
+      "description": "Arrange the blocks to clear rows"
     }
   ]
 }
