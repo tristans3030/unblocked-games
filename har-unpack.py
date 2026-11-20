@@ -66,11 +66,13 @@ def unpack_har(har_file: str, output_dir: str = "har_unpacked") -> None:
         text = content.get("text")
 
         if status != 200 or not url or text is None:
+            print(f"Skip (status {status}): {url}")
             skipped_count += 1
             continue
 
         rel_path = safe_rel_path(url, content.get("mimeType"))
         if rel_path is None:
+            print(f"Skip (status {status}): {url}")
             skipped_count += 1
             continue
 

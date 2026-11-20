@@ -119,6 +119,13 @@
       "thumbnail": "games/flappy-2048/thumb.png",
       "category": "Strategy",
       "description": "Flap your way up to 2048!"
+    },
+    {
+      "title": "Cookie Clicker",
+      "url": "games/cookieclicker/index.html",
+      "thumbnail": "games/flappy-2048/thumb.png",
+      "category": "Strategy",
+      "description": "Flap your way up to 2048!"
     }
   ]
 }
